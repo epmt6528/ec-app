@@ -1,6 +1,36 @@
-import { signInAction } from './actions'
+import { signInAction, signOutAction } from './actions'
 import { push } from 'connected-react-router'
 import { auth, FirebaseTimestamp, db } from '../../firebase/index'
+
+export const listenAuthState = () => {
+  return async (dispatch) => {
+    return auth.onAuthStateChanged((user) => {
+      if (user) {
+        const uid = user.uid
+
+        db.collection('users')
+          .doc(uid)
+          .get()
+          .then((snapshot) => {
+            const data = snapshot.data()
+
+            dispatch(
+              signInAction({
+                isSignedIn: true,
+                role: data.role,
+                uid: uid,
+                username: data.username,
+              })
+            )
+
+            dispatch(push('/'))
+          })
+      } else {
+        dispatch(push('/signin'))
+      }
+    })
+  }
+}
 
 export const signIn = (email, password) => {
   return async (dispatch) => {
@@ -82,5 +112,35 @@ export const signUp = (username, email, password, confirmPassword) => {
             })
         }
       })
+  }
+}
+
+export const signOut = () => {
+  return async (dispatch) => {
+    auth.signOut().then(() => {
+      dispatch(signOutAction())
+      dispatch(push('/signin'))
+    })
+  }
+}
+
+export const resetPassword = (email) => {
+  return async (dispatch) => {
+    if (email === '') {
+      alert('Enter your email')
+      return false
+    } else {
+      auth
+        .sendPasswordResetEmail(email)
+        .then(() => {
+          alert(
+            'Password reset instruction has been sent to your email address'
+          )
+          dispatch(push('/signin'))
+        })
+        .catch(() => {
+          alert('Faild password reset. Try again.')
+        })
+    }
   }
 }

@@ -6,6 +6,8 @@ import { signIn } from '../reducks/users/operations'
 
 import { useDispatch } from 'react-redux'
 
+import { push } from 'connected-react-router'
+
 const SignIn = () => {
   const dispatch = useDispatch()
 
@@ -56,6 +58,13 @@ const SignIn = () => {
           label={'Sign In'}
           onClick={() => dispatch(signIn(email, password))}
         />
+        <div className='module-spacer--medium' />
+        <p onClick={() => dispatch(push('/signup'))}>
+          Don't have your account? Sign up today!
+        </p>
+        <p onClick={() => dispatch(push('/signin/reset'))}>
+          Forgot your password?
+        </p>
       </div>
     </div>
   )

@@ -6,6 +6,8 @@ import { signUp } from '../reducks/users/operations'
 
 import { useDispatch } from 'react-redux'
 
+import { push } from 'connected-react-router'
+
 const SignUp = () => {
   const dispatch = useDispatch()
 
@@ -94,6 +96,10 @@ const SignUp = () => {
             dispatch(signUp(username, email, password, confirmPassword))
           }
         />
+        <div className='module-spacer--medium' />
+        <p onClick={() => dispatch(push('/signin'))}>
+          You already have account? Sign in from here.
+        </p>
       </div>
     </div>
   )
