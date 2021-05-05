@@ -1,5 +1,5 @@
 const initialState = {
-  products: {},
+  products: { list: [] },
   users: {
     isSignedIn: false,
     role: '',
