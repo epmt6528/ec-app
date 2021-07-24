@@ -2,10 +2,11 @@ import React, { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getProductsInCart } from '../reducks/users/selectors'
 import { makeStyles } from '@material-ui/styles'
-import { CartListItem } from '../components/Products/CartListItem'
+import { CartListItem } from '../components/Products'
 import List from '@material-ui/core/List'
 import Divider from '@material-ui/core/Divider'
 import { PrimaryButton, TextDetail } from '../components/UIkit'
+import { orderProduct } from '../reducks/products/operations'
 
 const useStyles = makeStyles((theme) => ({
   detailBox: {
@@ -34,6 +35,20 @@ const OrderConfirm = () => {
   const selector = useSelector((state) => state)
   const productsInCart = getProductsInCart(selector)
 
+  const subtotal = useMemo(() => {
+    return productsInCart.reduce((sum, product) => (sum += product.price), 0)
+  }, [productsInCart])
+
+  const shippingFee = subtotal >= 100 ? 0 : 20
+
+  const tax = subtotal * 0.1
+
+  const total = subtotal + shippingFee + tax
+
+  const order = useCallback(() => {
+    dispatch(orderProduct(productsInCart, total))
+  }, [productsInCart])
+
   return (
     <section className='c-section-wrapin'>
       <h2 className='u-text__headline'>Confirm Your Order</h2>
@@ -46,7 +61,20 @@ const OrderConfirm = () => {
               ))}
           </List>
         </div>
-        <div className={classes.orderBox}><TextDetail label={''} value={} /><TextDetail label={'Shipping'} value={} /><TextDetail label={'Tax'} value={} /><Divider /><TextDetail label={'Total'} value={} /></div>
+        <div className={classes.orderBox}>
+          <TextDetail
+            label={'Sub Total'}
+            value={'$' + subtotal.toLocaleString()}
+          />
+          <TextDetail label={'Tax'} value={'$' + tax.toLocaleString()} />
+          <TextDetail
+            label={'Shipping'}
+            value={'$' + shippingFee.toLocaleString()}
+          />
+          <Divider />
+          <TextDetail label={'Total'} value={'$' + total.toLocaleString()} />
+          <PrimaryButton label='Order' onClick={order} />
+        </div>
       </div>
     </section>
   )

@@ -18,7 +18,7 @@ const TextDetail = (props) => {
   const classes = useStyles()
 
   return (
-    <div>
+    <div className={classes.row}>
       <div className={classes.label}>{props.label}</div>
       <div className={classes.value}>{props.value}</div>
     </div>

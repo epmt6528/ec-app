@@ -10,13 +10,18 @@ service cloud.firestore {
       match /cart/{cartId} {
         allow read, write: if request.auth.uid == userId
       }
+
+      match /orders/{orderId}{
+        allow read, write: if request.auth.uid == userId
+      }
     }
 
     match /products/{productId}{
-      allow read: if request.auth.uid != null;
-      allow create: if request.auth.uid != null;
-      allow update;
-      allow delete: if request.auth.uid != null;
+      allow read, write: if request.auth.uid != null;
+    }
+
+    match /categories/{categoryId}{
+      allow read, write: if request.auth.uid != null;
     }
   }
 }

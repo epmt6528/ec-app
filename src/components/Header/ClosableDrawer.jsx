@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Divider from '@material-ui/core/Divider'
 import Drawer from '@material-ui/core/Drawer'
 import List from '@material-ui/core/List'
@@ -16,6 +16,7 @@ import { TextInput } from '../UIkit'
 import { push } from 'connected-react-router'
 import { signOut } from '../../reducks/users/operations'
 import { useDispatch } from 'react-redux'
+import { db } from '../../firebase'
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
@@ -54,6 +55,33 @@ const ClosableDrawer = (props) => {
     props.onClose(event, false)
   }
 
+  const [filters, setFilters] = useState([
+    {
+      func: selectMenu,
+      label: 'All',
+      id: 'all',
+      value: '/',
+    },
+    {
+      func: selectMenu,
+      label: 'Men',
+      id: 'men',
+      value: '/?gender=men',
+    },
+    {
+      func: selectMenu,
+      label: 'Women',
+      id: 'women',
+      value: '/?gender=women',
+    },
+    {
+      func: selectMenu,
+      label: 'Unisex',
+      id: 'unisex',
+      value: '/?gender=unisex',
+    },
+  ])
+
   const menus = [
     {
       func: selectMenu,
@@ -77,6 +105,25 @@ const ClosableDrawer = (props) => {
       value: '/profile',
     },
   ]
+
+  useEffect(() => {
+    db.collection('categories')
+      .orderBy('order', 'asc')
+      .get()
+      .then((snapshots) => {
+        const list = []
+        snapshots.forEach((snapshot) => {
+          const category = snapshot.data()
+          list.push({
+            func: selectMenu,
+            label: category.name,
+            id: category.id,
+            value: `/?category=${category.id}`,
+          })
+        })
+        setFilters((prevState) => [...prevState, ...list])
+      })
+  }, [])
 
   return (
     <nav className={classes.drawer}>
@@ -120,16 +167,24 @@ const ClosableDrawer = (props) => {
                 <ListItemText primary={menu.label} />
               </ListItem>
             ))}
-            <ListItem
-              button
-              key='logout'
-              onClick={() => dispatchEvent(signOut())}
-            >
+            <ListItem button key='logout' onClick={() => dispatch(signOut())}>
               <ListItemIcon>
                 <ExitToAppIcon />
               </ListItemIcon>
               <ListItemText primary={'Log Out'} />
             </ListItem>
+          </List>
+          <Divider />
+          <List>
+            {filters.map((filter) => (
+              <ListItem
+                button
+                key={filter.id}
+                onClick={(e) => filter.func(e, filter.value)}
+              >
+                <ListItemText primary={filter.label} />
+              </ListItem>
+            ))}
           </List>
         </div>
       </Drawer>
